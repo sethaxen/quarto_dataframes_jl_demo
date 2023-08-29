@@ -1,0 +1,35 @@
+---
+title: "DataFrames rendering test"
+---
+
+```{julia}
+#| output: false
+#| echo: false
+using Pkg
+Pkg.activate(".")
+Pkg.instantiate()
+```
+
+The following shows a table when rendered to PDF or HTML but nothing when rendered to markdown
+```{julia}
+using DataFrames
+df = DataFrame(:x => randn(10), :y => randn(10))
+```
+
+But there is a custom `show` method for HTML outputs:
+
+```{julia}
+sprint(show, "text/html", df)
+```
+
+In fact, if we just wrap the `DataFrame` with an object that has a custom HTML `show` method, it renders in markdown just fine:
+
+```{julia}
+struct DataFrameWrapper
+    df
+end
+
+Base.show(io::IO, mime::MIME"text/html", w::DataFrameWrapper) = show(io, mime, w.df)
+
+DataFrameWrapper(df)
+```
